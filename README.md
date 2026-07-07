@@ -1,8 +1,9 @@
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memory Match Challenge</title>
+<title>Memory Match Challenge - 3 Levels</title>
 
 <style>
 *{
@@ -29,10 +30,12 @@ h1{
 
 .info{
     display:flex;
-    gap:30px;
+    gap:25px;
     margin-bottom:20px;
     font-size:22px;
     font-weight:bold;
+    flex-wrap:wrap;
+    justify-content:center;
 }
 
 .game{
@@ -76,13 +79,15 @@ h1{
 .back{
     background:#ff4d6d;
     color:white;
+    font-size:35px;
 }
 
 #message{
     margin-top:20px;
-    font-size:30px;
+    font-size:28px;
     font-weight:bold;
     text-align:center;
+    min-height:40px;
 }
 
 @media(max-width:600px){
@@ -97,7 +102,11 @@ h1{
 }
 
 .front,.back{
-    font-size:30px;
+    font-size:28px;
+}
+
+.info{
+    font-size:18px;
 }
 }
 </style>
@@ -107,6 +116,7 @@ h1{
 <h1>🧠 Memory Match Game</h1>
 
 <div class="info">
+    <div>🏆 Level <span id="level">1</span>/3</div>
     <div>⏳ <span id="timer">70</span>s</div>
     <div>✅ <span id="pairs">0</span>/10</div>
 </div>
@@ -130,14 +140,17 @@ const emojis = [
 "❤️","❤️"
 ];
 
-let firstCard=null;
-let secondCard=null;
-let lockBoard=false;
-let matchedPairs=0;
-let timeLeft=70;
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+let matchedPairs = 0;
 let timer;
 
-const game=document.getElementById("game");
+let level = 1;
+const levelTimes = [70, 50, 30];
+let timeLeft = levelTimes[0];
+
+const game = document.getElementById("game");
 
 function shuffle(array){
     for(let i=array.length-1;i>0;i--){
@@ -148,12 +161,18 @@ function shuffle(array){
 
 function startGame(){
 
-    game.innerHTML="";
-    matchedPairs=0;
-    document.getElementById("pairs").textContent=0;
-    document.getElementById("message").textContent="";
+    game.innerHTML = "";
+    matchedPairs = 0;
 
-    let cards=[...emojis];
+    document.getElementById("pairs").textContent = "0";
+    document.getElementById("level").textContent = level;
+    document.getElementById("message").textContent = "";
+
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+
+    let cards = [...emojis];
     shuffle(cards);
 
     cards.forEach(emoji=>{
@@ -163,8 +182,8 @@ function startGame(){
         card.dataset.emoji=emoji;
 
         card.innerHTML=`
-        <div class="front">${emoji}</div>
-        <div class="back">?</div>
+            <div class="front">${emoji}</div>
+            <div class="back">?</div>
         `;
 
         card.addEventListener("click",flipCard);
@@ -178,27 +197,26 @@ function startGame(){
 function flipCard(){
 
     if(lockBoard) return;
-    if(this===firstCard) return;
+    if(this === firstCard) return;
     if(this.classList.contains("matched")) return;
 
     this.classList.add("flip");
 
     if(!firstCard){
-        firstCard=this;
+        firstCard = this;
         return;
     }
 
-    secondCard=this;
-    lockBoard=true;
+    secondCard = this;
+    lockBoard = true;
 
     checkMatch();
 }
 
 function checkMatch(){
 
-    const match=
-    firstCard.dataset.emoji===
-    secondCard.dataset.emoji;
+    const match =
+    firstCard.dataset.emoji === secondCard.dataset.emoji;
 
     if(match){
 
@@ -207,17 +225,30 @@ function checkMatch(){
 
         matchedPairs++;
 
-        document.getElementById("pairs")
-        .textContent=matchedPairs;
+        document.getElementById("pairs").textContent =
+        matchedPairs;
 
         resetBoard();
 
-        if(matchedPairs===10){
+        if(matchedPairs === 10){
 
             clearInterval(timer);
 
-            document.getElementById("message")
-            .innerHTML="🎉 YOU WIN! 🎉";
+            if(level < 3){
+
+                document.getElementById("message").innerHTML =
+                `🎉 Level ${level} Complete!`;
+
+                setTimeout(()=>{
+                    level++;
+                    startGame();
+                },2000);
+
+            }else{
+
+                document.getElementById("message").innerHTML =
+                "🏆 CONGRATULATIONS! YOU COMPLETED ALL 3 LEVELS! 🎉";
+            }
         }
 
     }else{
@@ -234,36 +265,40 @@ function checkMatch(){
 }
 
 function resetBoard(){
-    [firstCard,secondCard,lockBoard]=
-    [null,null,false];
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
 }
 
 function startTimer(){
 
     clearInterval(timer);
 
-    timeLeft=70;
+    timeLeft = levelTimes[level - 1];
 
-    document.getElementById("timer")
-    .textContent=timeLeft;
+    document.getElementById("timer").textContent =
+    timeLeft;
 
-    timer=setInterval(()=>{
+    timer = setInterval(()=>{
 
         timeLeft--;
 
-        document.getElementById("timer")
-        .textContent=timeLeft;
+        document.getElementById("timer").textContent =
+        timeLeft;
 
-        if(timeLeft<=0){
+        if(timeLeft <= 0){
 
             clearInterval(timer);
 
-            document.getElementById("message")
-            .innerHTML="⏰ Time Up! Restarting...";
+            document.getElementById("message").innerHTML =
+            "⏰ Time Up! Restarting From Level 1...";
 
             setTimeout(()=>{
+
+                level = 1;
                 startGame();
-            },2000);
+
+            },2500);
         }
 
     },1000);
