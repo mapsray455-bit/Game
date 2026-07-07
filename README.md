@@ -107,7 +107,7 @@ h1{
 <h1>🧠 Memory Match Game</h1>
 
 <div class="info">
-    <div>⏳ <span id="timer">50</span>s</div>
+    <div>⏳ <span id="timer">70</span>s</div>
     <div>✅ <span id="pairs">0</span>/10</div>
 </div>
 
@@ -134,7 +134,7 @@ let firstCard=null;
 let secondCard=null;
 let lockBoard=false;
 let matchedPairs=0;
-let timeLeft=50;
+let timeLeft=70;
 let timer;
 
 const game=document.getElementById("game");
@@ -242,7 +242,7 @@ function startTimer(){
 
     clearInterval(timer);
 
-    timeLeft=50;
+    timeLeft=70;
 
     document.getElementById("timer")
     .textContent=timeLeft;
